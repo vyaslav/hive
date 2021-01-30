@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.hive.druid.serde;
 
+import com.google.common.collect.UnmodifiableListIterator;
 import io.druid.query.scan.ScanQuery;
 import io.druid.query.scan.ScanResultValue;
 
@@ -30,6 +31,7 @@ import com.google.common.collect.Iterators;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Record reader for results for Druid ScanQuery.
@@ -42,8 +44,32 @@ public class DruidScanQueryRecordReader
       };
 
   private ScanResultValue current;
-
-  private Iterator<List<Object>> compactedValues = Iterators.emptyIterator();
+  private Iterator<List<Object>> compactedValues = new UnmodifiableListIterator<List<Object>>() {
+    @Override
+    public boolean hasNext() {
+      return false;
+    }
+    @Override
+    public List<Object> next() {
+      throw new NoSuchElementException();
+    }
+    @Override
+    public boolean hasPrevious() {
+      return false;
+    }
+    @Override
+    public List<Object> previous() {
+      throw new NoSuchElementException();
+    }
+    @Override
+    public int nextIndex() {
+      return 0;
+    }
+    @Override
+    public int previousIndex() {
+      return -1;
+    }
+  };
 
   @Override
   protected JavaType getResultTypeDef() {
